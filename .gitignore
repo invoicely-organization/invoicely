@@ -1,0 +1,5 @@
+# Task copies of the agents (Claude Code worktrees), dependencies and local secrets.
+.claude/worktrees/
+node_modules/
+.env
+.env.*

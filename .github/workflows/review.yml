@@ -1,0 +1,19 @@
+# The review job (INV-64): the reviewer agent from invoicely-agents reads every PR into main and writes a GitHub
+# review, inline where it can. The workflow, the agent and its script come from invoicely-agents' main.
+name: review
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: invoicely-organization/invoicely-agents/.github/workflows/review.yml@main
+    secrets: inherit
