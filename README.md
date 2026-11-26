@@ -19,7 +19,7 @@ Web (Vite) е на http://localhost:5173 и показва празна стра
 Staging е в Render, по ADR-013 (Хостинг, данни и операции). Услугите са описани в `render.yaml` (Render Blueprint):
 
 - web: https://invoicely-web.onrender.com (static site, раздава се през CDN на Render);
-- api: https://invoicely-api.onrender.com (web service от `Dockerfile`, регион Франкфурт, план `free`), `GET /health`.
+- api: https://invoicely-api-maco.onrender.com (web service от `Dockerfile`, регион Франкфурт, план `free`), `GET /health`.
 
 Нов деплой: всяко сливане в `main` пуска сам деплой на двете услуги до няколко минути; ръчна стъпка няма. Web взима
 адреса на api от `VITE_API_URL`, а api приема заявки (CORS) само от `WEB_ORIGIN`; и двете са в `render.yaml`. Ако

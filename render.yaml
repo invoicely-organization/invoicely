@@ -21,7 +21,7 @@ services:
         value: "22"
       # Read by Vite at build time (apps/web/src/config.ts).
       - key: VITE_API_URL
-        value: https://invoicely-api.onrender.com
+        value: https://invoicely-api-maco.onrender.com
 
   # The api: the Docker image of the Dockerfile at the root; the worker will run the same image with another command.
   - type: web
