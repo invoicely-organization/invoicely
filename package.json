@@ -1,0 +1,25 @@
+{
+  "name": "invoicely",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @invoicely/web --filter @invoicely/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm lint:eslint; eslint_status=$?; pnpm lint:deps && exit $eslint_status",
+    "lint:eslint": "eslint .",
+    "lint:deps": "depcruise apps packages --config .dependency-cruiser.mjs --output-type err",
+    "test": "vitest run && node --test \"e2e/**/*.test.mjs\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.0",
+    "dependency-cruiser": "^18.9.0",
+    "eslint": "^9.30.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.35.0",
+    "vitest": "^5.1.2"
+  }
+}
