@@ -3,7 +3,8 @@
   "compilerOptions": {
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "types": ["node"],
     "noEmit": true
   },
-  "include": ["src"]
+  "include": ["src", "owners.ts", "*.test.ts"]
 }

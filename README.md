@@ -10,7 +10,7 @@
 pnpm dev
 ```
 
-Web (Vite) е на http://localhost:5173, API (NestJS) на http://localhost:3000/api.
+Web (Vite) е на http://localhost:5173 и показва празна страница. API (NestJS) е на http://localhost:3000: `GET /health` връща 200, а маршрутите са под `/api/v1`.
 
 Проверките на CI: `pnpm typecheck`, `pnpm lint`, `pnpm test`. Картата на repo-то и правилата са в `CLAUDE.md`.
 
