@@ -1,0 +1,40 @@
+# Render Blueprint for staging (ADR-013 Хостинг, данни и операции). Every merge to main deploys both services.
+# Yoan creates the services in Render from this file; agents do not deploy and do not use the Render API.
+# Secrets are never written here: when they come, they are `sync: false` and Yoan sets them in Render.
+# If Render gives a service another onrender.com address, change it here and in README "Staging".
+services:
+  # The SPA (ADR-001), served from the Render CDN; a static site has no region.
+  - type: web
+    runtime: static
+    name: invoicely-web
+    branch: main
+    autoDeployTrigger: commit
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter @invoicely/web build
+    staticPublishPath: apps/web/dist
+    routes:
+      # A path without a file is a route of the SPA.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Read by Vite at build time (apps/web/src/config.ts).
+      - key: VITE_API_URL
+        value: https://invoicely-api.onrender.com
+
+  # The api: the Docker image of the Dockerfile at the root; the worker will run the same image with another command.
+  - type: web
+    runtime: docker
+    name: invoicely-api
+    region: frankfurt
+    plan: free
+    branch: main
+    autoDeployTrigger: commit
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      # The only origin CORS allows (apps/api/src/main.ts).
+      - key: WEB_ORIGIN
+        value: https://invoicely-web.onrender.com
