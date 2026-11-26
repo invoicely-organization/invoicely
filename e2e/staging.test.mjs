@@ -542,3 +542,59 @@ test('check 6c: the api address in README is the one render.yaml gives web, when
   // check 2 and check 6: one api address, in render.yaml and in README
   assert.ok(stagingSection().includes(host), `README "Staging" does not name the api host ${host} from render.yaml`);
 });
+
+// ---------------------------------------------------------------------------------------------------------------
+// INV-74: the real api address on staging. Render gave the api https://invoicely-api-maco.onrender.com, because
+// invoicely-api.onrender.com belongs to another service. One test (or more) per check in "Как проверявам":
+//   1 VITE_API_URL of web and WEB_ORIGIN of api in render.yaml, 2 README "Staging", 3 one api address in both.
+// The third check also asks that the staging tests in this file pass; that is the whole file, run by `pnpm test`.
+
+const STAGING_API_URL = 'https://invoicely-api-maco.onrender.com'; // INV-74 check 1 and check 2
+const STAGING_WEB_URL = 'https://invoicely-web.onrender.com'; // INV-74 check 1 and Agent notes: web is Live there
+const FOREIGN_API_URL = 'https://invoicely-api.onrender.com'; // INV-74 Какво: "invoicely-api.onrender.com е на чужда услуга"
+
+function envVarValue(s, key) {
+  const v = envVarsOf(s).find((x) => x?.key === key);
+  assert.ok(v, `${s.name} has no env var ${key}`);
+  return v.value;
+}
+
+// Every api address (https://invoicely-api*.onrender.com) written in a text, as distinct origins.
+function apiOriginsIn(text) {
+  const urls = text.match(/https:\/\/invoicely-api[\w-]*\.onrender\.com/g) ?? [];
+  return [...new Set(urls.map((u) => new URL(u).origin))];
+}
+
+test('INV-74 check 1a: render.yaml sets VITE_API_URL of invoicely-web to https://invoicely-api-maco.onrender.com', async () => {
+  // INV-74 check 1: "В render.yaml VITE_API_URL на invoicely-web е https://invoicely-api-maco.onrender.com"
+  assert.equal(envVarValue(await service(WEB), 'VITE_API_URL'), 'https://invoicely-api-maco.onrender.com');
+});
+
+test('INV-74 check 1b: render.yaml keeps WEB_ORIGIN of invoicely-api at https://invoicely-web.onrender.com', async () => {
+  // INV-74 check 1: "WEB_ORIGIN на api остава https://invoicely-web.onrender.com"
+  assert.equal(envVarValue(await service(API), 'WEB_ORIGIN'), 'https://invoicely-web.onrender.com');
+});
+
+test('INV-74 check 1c: render.yaml no longer names the foreign service https://invoicely-api.onrender.com', () => {
+  // INV-74 Какво: "Сега бъндълът на web сочи към чуждата услуга"
+  assert.ok(!readText('render.yaml').includes(FOREIGN_API_URL), `render.yaml still names ${FOREIGN_API_URL}`);
+});
+
+test('INV-74 check 2: README "Staging" gives the api address https://invoicely-api-maco.onrender.com, not the foreign one', () => {
+  const text = stagingSection();
+  // INV-74 check 2: "В README.md, раздел Staging, адресът на api е https://invoicely-api-maco.onrender.com"
+  assert.ok(text.includes(STAGING_API_URL), `the Staging section does not name ${STAGING_API_URL}`);
+  assert.ok(!text.includes(FOREIGN_API_URL), `the Staging section still names the foreign service ${FOREIGN_API_URL}`);
+  // Agent notes: "web на https://invoicely-web.onrender.com"; the web address stays in the section
+  assert.ok(text.includes(STAGING_WEB_URL), `the Staging section does not name the web address ${STAGING_WEB_URL}`);
+});
+
+test('INV-74 check 3: the api address is one and the same in render.yaml and in README "Staging"', async () => {
+  const fromYaml = envVarValue(await service(WEB), 'VITE_API_URL');
+  // INV-74 check 3: "адресът на api в render.yaml и в README е един и същ", so render.yaml writes it out (not fromService)
+  assert.equal(typeof fromYaml, 'string', 'VITE_API_URL of invoicely-web has no literal value to compare with README');
+  const yamlOrigins = apiOriginsIn(readText('render.yaml'));
+  const readmeOrigins = apiOriginsIn(stagingSection());
+  assert.deepEqual(yamlOrigins, [new URL(fromYaml).origin], `render.yaml names more than one api address: ${yamlOrigins.join(', ')}`);
+  assert.deepEqual(readmeOrigins, yamlOrigins, 'README "Staging" and render.yaml name different api addresses');
+});
