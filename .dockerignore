@@ -1,0 +1,9 @@
+# Kept out of the api image (Dockerfile at the root): dependencies and builds are made inside it, secrets never go in.
+**/node_modules
+**/dist
+.pnpm-store
+.git
+**/.env
+**/.env.*
+.claude
+.github
